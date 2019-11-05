@@ -18,7 +18,7 @@ module VagrantPlugins
           else
             logger.info('Writing the proxy configuration to files')
             super
-            write_config(sudo_config, path: '/etc/sudoers.d/proxy', mode: '0440')
+            write_config(sudo_config, path: "#{local_base}/sudoers.d/proxy", mode: '0440', owner: default_owner)
             write_environment_config
           end
         end
@@ -34,7 +34,7 @@ module VagrantPlugins
 
         def unconfigure_linux
           @machine.communicate.tap do |comm|
-            comm.sudo("rm -f /etc/sudoers.d/proxy")
+            comm.sudo("rm -f #{local_base}/sudoers.d/proxy")
             comm.sudo("rm -f #{config_path}")
           end
 
@@ -79,10 +79,6 @@ module VagrantPlugins
           end
         end
 
-        def windows_guest?
-          @machine.config.vm.guest.eql?(:windows)
-        end
-
         def sudo_config
           <<-CONFIG.gsub(/^\s+/, '')
             Defaults env_keep += "HTTP_PROXY HTTPS_PROXY FTP_PROXY NO_PROXY"
@@ -90,9 +86,21 @@ module VagrantPlugins
           CONFIG
         end
 
+        def local_base
+          freebsd_guest? ? "/usr/local/etc" : "/etc"
+        end
+
         def write_environment_config
           tmp = "/tmp/vagrant-proxyconf"
           path = "/etc/environment"
+          default_user = "root"
+          default_group = "root"
+          if freebsd_guest?
+            default_group = "wheel"
+            #path = "/etc/profile"
+          elsif openbsd_guest?
+            default_group = "wheel"
+          end
 
           sed_script = environment_sed_script
           local_tmp = tempfile(environment_config)
@@ -104,7 +112,7 @@ module VagrantPlugins
             comm.sudo("sed -e '#{sed_script}' -e '/^$/d' #{path} > #{path}.new")
             comm.sudo("cat #{tmp} >> #{path}.new")
             comm.sudo("chmod 0644 #{path}.new")
-            comm.sudo("chown root:root #{path}.new")
+            comm.sudo("chown #{default_user}:#{default_group} #{path}.new")
             comm.sudo("mv -f #{path}.new #{path}")
             comm.sudo("rm -f #{tmp}")
           end

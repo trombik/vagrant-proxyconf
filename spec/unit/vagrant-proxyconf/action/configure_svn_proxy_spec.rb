@@ -27,6 +27,7 @@ describe VagrantPlugins::ProxyConf::Action::ConfigureSvnProxy do
       svn_proxy.instance_variable_set(:@machine, machine)
 
       allow(svn_proxy).to receive(:config) { config }
+      allow(machine).to receive_message_chain(:config, :vm, :guest).and_return("linux")
       allow(machine).to receive_message_chain(:guest, :capability?).with(:svn_proxy_conf).and_return(@supported)
       allow(machine).to receive_message_chain(:guest, :capability).with(:svn_proxy_conf).and_return(@supported)
 
@@ -64,6 +65,7 @@ describe VagrantPlugins::ProxyConf::Action::ConfigureSvnProxy do
       svn_proxy.instance_variable_set(:@machine, machine)
 
       allow(svn_proxy).to receive(:config) { config }
+      allow(machine).to receive_message_chain(:config, :vm, :guest).and_return("linux")
       allow(machine).to receive_message_chain(:guest, :capability?).with(:svn_proxy_conf).and_return(@supported)
       allow(machine).to receive_message_chain(:guest, :capability).with(:svn_proxy_conf).and_return(@supported)
 

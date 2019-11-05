@@ -71,6 +71,7 @@ describe VagrantPlugins::ProxyConf::Action::ConfigureYumProxy do
         config.http = "http://username:pass@some-yum-proxy-server:8080"
 
         allow(yum_proxy).to receive(:config) { config }
+        allow(machine).to receive_message_chain(:config, :vm, :guest).and_return("linux")
         allow(machine).to receive_message_chain(:guest, :capability?).with(:yum_proxy_conf).and_return(true)
         allow(machine).to receive_message_chain(:guest, :capability).with(:yum_proxy_conf).and_return("/etc/yum.conf")
 

@@ -18,6 +18,7 @@ module VagrantPlugins
 
           tmp = "/tmp/vagrant-proxyconf"
           path = config_path
+          owner = "#{default_owner}:#{default_group}"
 
           @machine.communicate.tap do |comm|
             comm.sudo("rm -f #{tmp}", error_check: false)
@@ -25,7 +26,7 @@ module VagrantPlugins
             comm.sudo("touch #{path}")
             comm.sudo("gawk -f #{tmp} #{proxy_params} #{path} > #{path}.new")
             comm.sudo("chmod 0644 #{path}.new")
-            comm.sudo("chown root:root #{path}.new")
+            comm.sudo("chown #{owner} #{path}.new")
             comm.sudo("mv -f #{path}.new #{path}")
             comm.sudo("rm -f #{tmp}")
           end

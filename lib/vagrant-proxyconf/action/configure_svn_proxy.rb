@@ -22,11 +22,12 @@ module VagrantPlugins
 
         def unconfigure_machine
           return if !supported?
+          owner = "#{default_owner}:#{default_group}"
 
           @machine.communicate.tap do |comm|
             comm.sudo("touch /etc/subversion/servers")
             comm.sudo("sed -i.bak -e '/^http-proxy-/d' /etc/subversion/servers")
-            comm.sudo("chown root:root /etc/subversion/servers")
+            comm.sudo("chown #{owner} /etc/subversion/servers")
             comm.sudo("chmod 0644 /etc/subversion/servers")
           end
           true

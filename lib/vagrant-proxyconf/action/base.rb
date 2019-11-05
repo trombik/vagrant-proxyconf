@@ -85,6 +85,7 @@ module VagrantPlugins
           tmp = "/tmp/vagrant-proxyconf"
           path = opts[:path] || config_path
           local_tmp = tempfile(config)
+          owner = "#{default_owner}:#{default_group}"
 
           logger.debug "Configuration (#{path}):\n#{config}"
 
@@ -92,7 +93,7 @@ module VagrantPlugins
             comm.upload(local_tmp.path, tmp)
             if comm.test("command -v sudo")
               comm.sudo("chmod #{opts[:mode] || '0644'} #{tmp}")
-              comm.sudo("chown #{opts[:owner] || 'root:root'} #{tmp}")
+              comm.sudo("chown #{opts[:owner] || owner} #{tmp}")
               comm.sudo("mkdir -p #{File.dirname(path)}")
               comm.sudo("mv -f #{tmp} #{path}")
             else
@@ -169,6 +170,40 @@ module VagrantPlugins
 
         def config_path
           @machine.guest.capability(cap_name)
+        end
+
+        def windows_guest?
+          @machine.config.vm.guest.eql?(:windows)
+        end
+
+        def freebsd_guest?
+          @machine.config.vm.guest.eql?(:freebsd)
+        end
+
+        def openbsd_guest?
+          @machine.config.vm.guest.eql?(:openbsd)
+        end
+
+        def default_owner
+          case @machine.config.vm.guest
+          when :freebsd
+            "root"
+          when :openbsd
+            "root"
+          else
+            "root"
+          end
+        end
+
+        def default_group
+          case @machine.config.vm.guest
+          when :freebsd
+            "wheel"
+          when :openbsd
+            "wheel"
+          else
+            "root"
+          end
         end
       end
     end

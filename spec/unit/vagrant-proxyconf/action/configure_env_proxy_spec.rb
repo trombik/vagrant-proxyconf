@@ -137,6 +137,7 @@ describe VagrantPlugins::ProxyConf::Action::ConfigureEnvProxy do
           proxy = create_config_proxy(@config)
 
           allow(machine).to receive_message_chain(:config, :proxy).and_return(proxy)
+          allow(machine).to receive_message_chain(:config, :vm, :guest).and_return("linux")
           allow(machine).to receive_message_chain(:config, :public_send).with(:env_proxy).and_return(proxy)
           allow(machine).to receive_message_chain(:communicate, :sudo).with("rm -f /etc/sudoers.d/proxy")
           allow(machine).to receive_message_chain(:communicate, :sudo).with("rm -f /etc/profile.d/proxy.sh")
